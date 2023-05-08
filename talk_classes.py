@@ -23,16 +23,18 @@ class Song(Base):
     title = Column(String, nullable=False)
     artist = Column(String, nullable=False)
     genre = Column(String)
+    image_url = Column(String)  # Add this line
     user_id = Column(Integer, ForeignKey('users.id'))
 
-    def __init__(self, title, artist, user_id, genre=None):
+    def __init__(self, title, artist, user_id, genre=None, image_url=None):  # Update the constructor
         self.title = title
         self.artist = artist
         self.user_id = user_id
         self.genre = genre
+        self.image_url = image_url  # Add this line
 
     def __repr__(self) -> str:
-        return f"Song(title='{self.title}', artist='{self.artist}', genre='{self.genre}')"
+        return f"Song(title='{self.title}', artist='{self.artist}', genre='{self.genre}', image_url='{self.image_url}')"
 
 # class User(Base):
 #     __tablename__ = 'users'

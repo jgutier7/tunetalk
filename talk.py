@@ -8,6 +8,45 @@ from flask_bootstrap import Bootstrap
 from talk_classes import User, Song
 
 
+from spotify_auth import app, auth_query_parameters, SPOTIFY_AUTH_URL, SPOTIFY_TOKEN_URL, SPOTIFY_API_URL
+
+# Modify the /spotify/auth route
+@app.route('/spotify/auth')
+def spotify_auth():
+    url_args = "&".join(["{}={}".format(key, quote(val)) for key, val in auth_query_parameters.items()])
+    auth_url = "{}/?{}".format(SPOTIFY_AUTH_URL, url_args)
+    return redirect(auth_url)
+
+# Replace the spotify_callback() function
+@app.route('/spotify/callback')
+def spotify_callback():
+    auth_token = request.args['code']
+    code_payload = {
+        "grant_type": "authorization_code",
+        "code": str(auth_token),
+        "redirect_uri": REDIRECT_URI,
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET,
+    }
+    post_request = requests.post(SPOTIFY_TOKEN_URL, data=code_payload)
+
+    response_data = json.loads(post_request.text)
+    access_token = response_data["access_token"]
+
+    authorization_header = {"Authorization": "Bearer {}".format(access_token)}
+
+    user_profile_api_endpoint = "{}/me".format(SPOTIFY_API_URL)
+    profile_response = requests.get(user_profile_api_endpoint, headers=authorization_header)
+    profile_data = json.loads(profile_response.text)
+
+    playlist_api_endpoint = "{}/playlists".format(profile_data["href"])
+    playlists_response = requests.get(playlist_api_endpoint, headers=authorization_header)
+    playlist_data = json.loads(playlists_response.text)
+
+    display_arr = [profile_data] + playlist_data["items"]
+    return render_template("index.html", sorted_array=display_arr)
+
+
 # Set up OpenAI API credentials
 openai.api_key = "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"
 
@@ -143,7 +182,6 @@ def recommend_character_assumption(song, artist):
     except Exception as e:
         return None, str(e)
 
-from spotify_auth import spotify_client
 
 @app.route('/spotify/callback')
 def spotify_callback():
@@ -166,6 +204,65 @@ def spotify_callback():
 
     return render_template('index.html', character_assumption=character_assumption)
 
+
+# @app.route('/spotify/callback')
+# def spotify_callback():
+#     code = request.args.get('code')
+#     if not code:
+#         error = request.args.get('error')
+#         if error:
+#             flash(f"Spotify login error: {error}")
+#         else:
+#             flash("Spotify login error: missing code")
+#         return redirect(url_for('index'))
+
+#     try:
+#         token_info = spotify_client.auth_manager.get_access_token(code)
+#         spotify_client.auth_manager._token_info = token_info
+
+#         current_track = spotify_client.current_playback()
+#         current_user_id = db_session.query(User).filter_by(username=session['username']).first().id
+#         album_cover_url = current_track['item']['album']['images'][0]['url']  # Get the album cover URL
+
+#         song_obj = Song(
+#             title=current_track['item']['name'],
+#             artist=current_track['item']['artists'][0]['name'],
+#             user_id=current_user_id,
+#             image_url=album_cover_url  # Add this line
+#         )
+        
+#         db_session.add(song_obj)
+#         db_session.commit()
+
+#     except Exception as e:
+#         flash(f"Error: {str(e)}")
+#         return redirect(url_for('index'))
+
+    # character_assumption, error = recommend_character_assumption(song_obj.title, song_obj.artist)
+    # if error:
+    #     flash(f"Error: {error}")
+    #     return redirect(url_for('index'))
+
+    return redirect(url_for('spotify_assumption'))  # Redirect to the new page instead of rendering the index
+
+@app.route('/spotify_assumption')
+@login_required
+def spotify_assumption():
+    current_user_id = db_session.query(User).filter_by(username=session['username']).first().id
+    last_song = db_session.query(Song).filter_by(user_id=current_user_id).order_by(Song.id.desc()).first()
+
+    if last_song:
+        song = last_song.title
+        artist = last_song.artist
+        album_cover = last_song.image_url  # Get the album cover URL from the Song object
+        character_assumption, error = recommend_character_assumption(song, artist)
+    else:
+        song = None
+        artist = None
+        album_cover = None
+        character_assumption = None
+
+    return render_template('spotify_assumption.html', song=song, artist=artist, album_cover=album_cover, character_assumption=character_assumption)
 
 @app.route('/spotify/auth')
 def spotify_auth():

@@ -1,33 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Character Assumption</title>
-</head>
-<body>
-    {% include 'navbar.html' %}
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-    <h1>Character Assumption Based on Song Recommendation</h1>
-    <form action="/" method="post">
-        <label for="song">Song:</label>
-        <input type="text" id="song" name="song" required><br><br>
-        <label for="artist">Artist:</label>
-        <input type="text" id="artist" name="artist" required><br><br>
-        <input type="submit" value="Submit">
-    </form>
-    {% if character_assumption %}
-        <p>Character assumption: {{ character_assumption }}</p>
-    {% endif %}
-    <a href="{{ url_for('spotify_auth') }}" class="btn btn-primary">Spotify Login</a>
-</body>
-</html>
+{% extends 'navbar.html' %}
 
+{% block title %}
+    Character Assumption
+{% endblock %}
+
+{% block welcome_message %}
+    {% if 'username' in session %}
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h4>Welcome, {{ session['username'] }}!</h4>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        <h1>Character Assumption Based on Song Recommendation</h1>
+        <form action="/" method="post">
+            <label for="song">Song:</label>
+            <input type="text" id="song" name="song" required><br><br>
+            <label for="artist">Artist:</label>
+            <input type="text" id="artist" name="artist" required><br><br>
+            <input type="submit" value="Submit">
+        </form>
+        {% if character_assumption %}
+            <p>Character assumption: {{ character_assumption }}</p>
+        {% endif %}
+        <a href="{{ url_for('spotify_auth') }}" class="btn btn-primary">Spotify Login</a>
+    </div>
+{% endblock %}

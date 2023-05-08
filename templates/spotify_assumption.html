@@ -1,0 +1,14 @@
+{% extends 'navbar.html' %}
+
+{% block title %}Spotify Character Assumption{% endblock %}
+
+{% block content %}
+    <h1>Character Assumption Based on Your Spotify Song</h1>
+    <p>Song: {{ song }}</p>
+    <p>Artist: {{ artist }}</p>
+    <p><img src="{{ album_cover }}" alt="Album Cover"></p>
+    {% if character_assumption %}
+        <p>Character assumption: {{ character_assumption }}</p>
+    {% endif %}
+{% endblock %}
+
