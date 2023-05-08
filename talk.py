@@ -1,4 +1,4 @@
-from flask import Flask, session, render_template, request, redirect, url_for, flash
+from flask import Flask, session, render_template, request, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import openai
@@ -7,46 +7,7 @@ from db_manager import db_session
 from flask_bootstrap import Bootstrap
 from talk_classes import User, Song
 
-
-from spotify_auth import app, auth_query_parameters, SPOTIFY_AUTH_URL, SPOTIFY_TOKEN_URL, SPOTIFY_API_URL
-
-# Modify the /spotify/auth route
-@app.route('/spotify/auth')
-def spotify_auth():
-    url_args = "&".join(["{}={}".format(key, quote(val)) for key, val in auth_query_parameters.items()])
-    auth_url = "{}/?{}".format(SPOTIFY_AUTH_URL, url_args)
-    return redirect(auth_url)
-
-# Replace the spotify_callback() function
-@app.route('/spotify/callback')
-def spotify_callback():
-    auth_token = request.args['code']
-    code_payload = {
-        "grant_type": "authorization_code",
-        "code": str(auth_token),
-        "redirect_uri": REDIRECT_URI,
-        'client_id': CLIENT_ID,
-        'client_secret': CLIENT_SECRET,
-    }
-    post_request = requests.post(SPOTIFY_TOKEN_URL, data=code_payload)
-
-    response_data = json.loads(post_request.text)
-    access_token = response_data["access_token"]
-
-    authorization_header = {"Authorization": "Bearer {}".format(access_token)}
-
-    user_profile_api_endpoint = "{}/me".format(SPOTIFY_API_URL)
-    profile_response = requests.get(user_profile_api_endpoint, headers=authorization_header)
-    profile_data = json.loads(profile_response.text)
-
-    playlist_api_endpoint = "{}/playlists".format(profile_data["href"])
-    playlists_response = requests.get(playlist_api_endpoint, headers=authorization_header)
-    playlist_data = json.loads(playlists_response.text)
-
-    display_arr = [profile_data] + playlist_data["items"]
-    return render_template("index.html", sorted_array=display_arr)
-
-
+from sqlalchemy.dialects import sqlite
 # Set up OpenAI API credentials
 openai.api_key = "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"
 
@@ -182,14 +143,26 @@ def recommend_character_assumption(song, artist):
     except Exception as e:
         return None, str(e)
 
-
+from spotify_auth import spotify_client
 @app.route('/spotify/callback')
 def spotify_callback():
     # This code will be executed after a user authorizes your app
     # You can access the user's data using the `spotify_client` object
     # For example, to get the currently playing track, you can call the following function:
     current_track = spotify_client.current_playback()
+    print(f"Session username: {session['username']}")
+    query = db_session.query(User).filter_by(username=session['username'])
     
+    # Print the SQL query and its parameters
+    compiled_query = query.statement.compile(dialect=sqlite.dialect(), compile_kwargs={"literal_binds": True})
+    print(f"SQL Query: {compiled_query}")
+    
+    user = query.first()
+    if not user:
+        flash("Error: User not found")
+        return redirect(url_for('index'))
+
+    current_user_id = user.id
     # Store the current_track in the songs table
     current_user_id = db_session.query(User).filter_by(username=session['username']).first().id
     song_obj = Song(title=current_track['item']['name'], artist=current_track['item']['artists'][0]['name'], user_id=current_user_id)
@@ -203,47 +176,6 @@ def spotify_callback():
         return redirect(url_for('index'))
 
     return render_template('index.html', character_assumption=character_assumption)
-
-
-# @app.route('/spotify/callback')
-# def spotify_callback():
-#     code = request.args.get('code')
-#     if not code:
-#         error = request.args.get('error')
-#         if error:
-#             flash(f"Spotify login error: {error}")
-#         else:
-#             flash("Spotify login error: missing code")
-#         return redirect(url_for('index'))
-
-#     try:
-#         token_info = spotify_client.auth_manager.get_access_token(code)
-#         spotify_client.auth_manager._token_info = token_info
-
-#         current_track = spotify_client.current_playback()
-#         current_user_id = db_session.query(User).filter_by(username=session['username']).first().id
-#         album_cover_url = current_track['item']['album']['images'][0]['url']  # Get the album cover URL
-
-#         song_obj = Song(
-#             title=current_track['item']['name'],
-#             artist=current_track['item']['artists'][0]['name'],
-#             user_id=current_user_id,
-#             image_url=album_cover_url  # Add this line
-#         )
-        
-#         db_session.add(song_obj)
-#         db_session.commit()
-
-#     except Exception as e:
-#         flash(f"Error: {str(e)}")
-#         return redirect(url_for('index'))
-
-    # character_assumption, error = recommend_character_assumption(song_obj.title, song_obj.artist)
-    # if error:
-    #     flash(f"Error: {error}")
-    #     return redirect(url_for('index'))
-
-    return redirect(url_for('spotify_assumption'))  # Redirect to the new page instead of rendering the index
 
 @app.route('/spotify_assumption')
 @login_required
