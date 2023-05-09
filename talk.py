@@ -9,8 +9,8 @@ from talk_classes import User, Song
 
 from sqlalchemy.dialects import sqlite
 # Set up OpenAI API credentials
-openai.api_key = "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"
-
+# openai.api_key = "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"
+openai.api_key = "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"
 app = Flask(__name__)
 Bootstrap(app)
 app.secret_key = 'i_hate_this_project_fr'
