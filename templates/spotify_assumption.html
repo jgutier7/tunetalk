@@ -8,7 +8,7 @@
     <p>Artist: {{ artist }}</p>
     <p><img src="{{ album_cover }}" alt="Album Cover"></p>
     {% if character_assumption %}
-        <p>Character assumption: {{ character_assumption }}</p>
+        <p>Selected Prompt: {{ prompt }}</p>
+        <p>Prompt response: {{ character_assumption }}</p>
     {% endif %}
 {% endblock %}
-

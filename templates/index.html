@@ -1,9 +1,8 @@
-{% extends 'navbar.html' %}
+{% extends 'jumbotron.html' %}
 
 {% block title %}
     Character Assumption
 {% endblock %}
-
 {% block welcome_message %}
     {% if 'username' in session %}
         <div class="container">
@@ -17,27 +16,47 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <ul class="flashes">
-                    {% for message in messages %}
-                        <li>{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        {% endwith %}
-        <h1>Character Assumption Based on Song Recommendation</h1>
-        <form action="/" method="post">
-            <label for="song">Song:</label>
-            <input type="text" id="song" name="song" required><br><br>
-            <label for="artist">Artist:</label>
-            <input type="text" id="artist" name="artist" required><br><br>
-            <input type="submit" value="Submit">
-        </form>
-        {% if character_assumption %}
-            <p>Character assumption: {{ character_assumption }}</p>
-        {% endif %}
-        <a href="{{ url_for('spotify_auth') }}" class="btn btn-primary">Spotify Login</a>
-    </div>
+  <div class="container">
+    <h1 class="mt-4 mb-4">Welcome to Tunetalk! </h1>
+    <p>
+        Tunetalk is a fun and interactive app that generates creative content inspired by your favorite songs and artists. Simply enter a song title, artist name, and select a prompt to explore various scenarios, stories, and concepts based on the music you love. You can also connect your Spotify account to use the currently playing track for an even more personalized experience. Let your imagination run wild with Tunetalk!
+    </p>
+    <p>
+        Reponses are generated using OpenAI's GPT-3 model 
+    </p>
+    <form method="POST">
+      <div class="mb-3">
+        <label for="song" class="form-label">Song</label>
+        <input type="text" class="form-control" id="song" name="song" required>
+      </div>
+      <div class="mb-3">
+        <label for="artist" class="form-label">Artist</label>
+        <input type="text" class="form-control" id="artist" name="artist" required>
+      </div>
+      <div class="mb-3">
+        <label for="prompt_option" class="form-label">Prompt Option</label>
+        <select class="form-select" id="prompt_option" name="prompt_option" required>
+          <option value="" disabled selected>Select a prompt</option>
+          <option value="1">Create a short story...</option>
+          <option value="2">Imagine as a soundtrack...</option>
+          <option value="3">Write a fictional conversation...</option>
+          <option value="4">If the song were a person...</option>
+          <option value="5">Create a playlist...</option>
+          <option value="6">Write a poem...</option>
+          <option value="7">Design an album cover...</option>
+          <option value="8">If the song were a dish...</option>
+          <option value="9">Imagine as a video game character...</option>
+          <option value="10">Describe a dream music festival...</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+    {% if character_assumption %}
+      <div class="mt-5">
+        <h2>Prompt Response:</h2>
+        <p>{{ character_assumption }}</p>
+      </div>
+    {% endif %}
+  </div>
 {% endblock %}

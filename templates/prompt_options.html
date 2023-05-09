@@ -1,0 +1,26 @@
+{% extends 'navbar.html' %}
+
+{% block title %}
+    Prompt Options
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Choose a prompt based on the song {{ song_title }} by {{ artist_name }}</h1>
+        <form action="{{ url_for('process_prompt') }}" method="post">
+            {% for prompt in prompts %}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="prompt_option" id="{{ loop.index }}" value="{{ loop.index }}" {% if loop.first %}checked{% endif %}>
+                    <label class="form-check-label" for="{{ loop.index }}">
+                        {{ prompt|format(song_title=song_title, artist_name=artist_name) }}
+                    </label>
+                </div>
+            {% endfor %}
+            <input type="hidden" name="song_title" value="{{ song_title }}">
+            <input type="hidden" name="artist_name" value="{{ artist_name }}">
+            <br>
+            <input type="submit" value="Submit" class="btn btn-primary">
+        </form>
+    </div>
+{% endblock %}
+

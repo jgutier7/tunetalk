@@ -1,16 +1,13 @@
-{% extends 'bootstrap/base.html' %}
-
 {% block head %}
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 {% endblock %}
-
-{% block title %}Default Title{% endblock %}
 
 {% block navbar %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                <img src="{{ url_for('static', filename='Tt.png') }}" alt="Logo" height="30">
+                <img src="{{ url_for('static', filename='Tt.png') }}" alt="Logo" height="100">
             </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -34,7 +31,7 @@
                     </li>
                     {% if 'username' in session %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('spotify_auth') }}">Login with Spotify</a>
+                            <a class="nav-link" href="{{ url_for('spotify_auth') }}">Use Current Song Playing in Spotify</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -43,6 +40,16 @@
     </nav>
     {% block welcome_message %}
     {% endblock %}
+    
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
 {% endblock %}
 
 {% block content %}
