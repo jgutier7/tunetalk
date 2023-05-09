@@ -181,9 +181,8 @@ def ai_prompt(song, artist, prompt_option):
 from spotify_auth import spotify_client
 @app.route('/spotify/callback')
 def spotify_callback():
-    # This code will be executed after a user authorizes your app
     # You can access the user's data using the `spotify_client` object
-    # For example, to get the currently playing track, you can call the following function:
+    # o get the currently playing track,
     current_track = spotify_client.current_playback()
     print(f"Session username: {session['username']}")
     query = db_session.query(User).filter_by(username=session['username'])
@@ -207,6 +206,7 @@ def spotify_callback():
 
     # Send the stored song to the OpenAI query
     # prompt_option = session.get('prompt_option', None)  # Retrieve the stored prompt_option from the session
+    # ^^ weird bug occuring, ditching the prompt option 
     character_assumption, error = ai_prompt(song_obj.title, song_obj.artist, prompt_option)
     if error:
         flash(f"Error: {error}")
