@@ -8,16 +8,6 @@ Creative content generation using OpenAI API
 Integration with the Spotify API for user's currently playing song
 Customizable creative prompts
 Responsive and user-friendly design
-Programming Paradigms
-
-Object-Oriented Programming (OOP)
-Tunetalk utilizes object-oriented programming principles to create a well-structured, modular, and maintainable codebase. Classes, inheritance, and encapsulation are employed to define and organize the application's data models and their associated methods. For example, the User and Song classes in the project represent the users and their submitted songs, respectively.
-
-Functional Programming (FP)
-Functional programming concepts, such as higher-order functions, immutability, and pure functions, are used throughout Tunetalk to create clean, efficient, and easily testable code. For instance, the use of Python's built-in higher-order functions, such as map() and filter(), helps to process and transform data in a concise and readable manner.
-
-Event-Driven Programming (EDP)
-The project leverages event-driven programming techniques to handle user interactions and manage application state. The Flask web framework's routing and event handling system allows the application to respond to user requests and update the UI accordingly. This enables a dynamic and interactive experience for users, as the application can react to their actions in real-time.
 
 Getting Started
 
